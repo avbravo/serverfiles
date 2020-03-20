@@ -5,7 +5,9 @@
  */
 package com.bpbonline.serverfiles.resources;
 
+
 import com.avbravo.jmoordbutils.JsfUtil;
+import com.avbravo.jmoordbutils.fileencripter.FileDecryption;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -38,16 +40,16 @@ public class FileService {
         MultivaluedMap<String, String> map = headers.getRequestHeaders();
         String fileName = getFileName(map);
         OutputStream out = null;
-
+        System.out.println("||||-------------------->"+fileName);
         File directorio = new File(directory);
         if (!directorio.exists()) {
             //Crear el directorio
-//            if (directorio.mkdirs()) {
-//                System.out.println("---> creado el directorio");
+            if (directorio.mkdirs()) {
+              System.out.println("---> creado el directorio");
 //
-//            } else {
-//                System.out.println("---> no se creo el directorio");
-//            }
+          } else {
+                System.out.println("---> no se creo el directorio");
+            }
         }
 
         String filePath = directory + JsfUtil.fileSeparator() + fileName;
@@ -58,6 +60,10 @@ public class FileService {
             while ((len = fileInputStream.read(buf)) > 0) {
                 out.write(buf, 0, len);
             }
+            
+            //Desencripta el archivo
+           
+            
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -68,6 +74,10 @@ public class FileService {
                 e.printStackTrace();
             }
         }
+         if(fileName.equals("license.des")){
+                desencriptarFile();
+            }
+             
         return Response.status(Response.Status.OK).entity("File '" + filePath + "' uploaded successfully")
                 .type(MediaType.TEXT_PLAIN).build();
     }
@@ -83,5 +93,34 @@ public class FileService {
         }
         return "";
     }
-
+    
+    
+    // <editor-fold defaultstate="collapsed" desc="desencriptarFile()">
+     public String desencriptarFile(){
+        try{
+            String fileEnc = directory+JsfUtil.fileSeparator()+"license.enc"; 
+     
+            String fileIvEnc= directory+JsfUtil.fileSeparator()+"licenseiv.enc";
+            String fileDes= directory+JsfUtil.fileSeparator()+"license.des";
+            
+                   System.out.println("fileEnc "+fileEnc);
+                   System.out.println("fileIVEnc "+fileIvEnc);
+            String keyDesCifrado=JsfUtil.desencriptar("Cwn31aDWCb1u4OKjX5QEsLyCCXxtw8enAhKbLM/raCU=");
+           String extension="json";
+            System.out.println("voy a descifrar ");
+            if(FileDecryption.desencriptarFile(fileEnc, fileIvEnc,fileDes, keyDesCifrado, extension)){
+               JsfUtil.successMessage("Se desencripto archivo");
+                       System.out.println("Se desencripto archivo");
+            }else{
+                JsfUtil.warningMessage("No se desencripto el archivo");
+                  System.out.println("No se desencripto el archivo");
+            }
+         
+          } catch (Exception e) {
+            JsfUtil.errorDialog("desencriptarFile()", e.getLocalizedMessage());
+               System.out.println("desencriptarFile()"+ e.getLocalizedMessage());
+        }
+        return "";
+    }
+// </editor-fold>
 }

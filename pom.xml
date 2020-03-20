@@ -30,6 +30,11 @@
             <version>7.0</version>
         </dependency>
         <dependency>
+            <groupId>com.github.avbravo</groupId>
+            <artifactId>jmoordbutils</artifactId>
+            <version>0.67</version>
+        </dependency>
+        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>${jakartaee}</version>
@@ -46,13 +51,9 @@
             <artifactId>jersey-container-servlet</artifactId>
             <version>${jersey.version}</version>
         </dependency>
-
-
-        <dependency>
-            <groupId>com.github.avbravo</groupId>
-            <artifactId>jmoordbutils</artifactId>
-            <version>0.65</version>
-        </dependency>
+        
+        
+        
     </dependencies>
     
     <build>
