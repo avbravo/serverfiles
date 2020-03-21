@@ -38,14 +38,13 @@ public class FileService {
     @Produces(MediaType.TEXT_PLAIN)
     public Response reciveFile(@Context HttpHeaders headers, InputStream fileInputStream) {
         MultivaluedMap<String, String> map = headers.getRequestHeaders();
-        System.out.println("======================================llego  reciveFile");
+ 
         //getFileName
         String fileName = getFileName(map);
-        System.out.println("--------------> fileName "+fileName);
+
         //get folder
         String folder = getFolder(map);
-        System.out.println("===================FOLDER====================");
-        System.out.println("___> folder "+folder);
+
         
         OutputStream out = null;
 
