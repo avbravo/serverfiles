@@ -36,11 +36,19 @@ public class FileService {
     @Path("/upload")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response sendFile(@Context HttpHeaders headers, InputStream fileInputStream) {
+    public Response reciveFile(@Context HttpHeaders headers, InputStream fileInputStream) {
         MultivaluedMap<String, String> map = headers.getRequestHeaders();
+        System.out.println("======================================llego  reciveFile");
+        //getFileName
         String fileName = getFileName(map);
+        System.out.println("--------------> fileName "+fileName);
+        //get folder
+        String folder = getFolder(map);
+        System.out.println("===================FOLDER====================");
+        System.out.println("___> folder "+folder);
+        
         OutputStream out = null;
-        System.out.println("||||-------------------->"+fileName);
+
         File directorio = new File(directory);
         if (!directorio.exists()) {
             //Crear el directorio
@@ -83,14 +91,36 @@ public class FileService {
     }
 
     private String getFileName(MultivaluedMap<String, String> headers) {
-        String[] contentDisposition = headers.getFirst("Content-Disposition").split(";");
+        try {
+           String[] contentDisposition = headers.getFirst("Content-Disposition").split(";");
         for (String filename : contentDisposition) {
             if ((filename.trim().startsWith("filename"))) {
                 String[] name = filename.split("=");
                 String finalFileName = name[1].trim().replaceAll("\"", "");
                 return finalFileName;
             }
+        }  
+        } catch (Exception e) {
+            System.out.println("getFileName() "+e.getLocalizedMessage());
         }
+       
+        return "";
+    }
+    
+    private String getFolder(MultivaluedMap<String, String> headers) {
+        try {
+             String[] folder = headers.getFirst("folder").split(";");
+        for (String filename : folder) {
+            if ((filename.trim().startsWith("folder"))) {
+                String[] name = filename.split("=");
+                String finalFileName = name[1].trim().replaceAll("\"", "");
+                return finalFileName;
+            }
+        }
+        } catch (Exception e) {
+            System.out.println(" getFolder() "+e.getLocalizedMessage());
+        }
+       
         return "";
     }
     
@@ -105,6 +135,7 @@ public class FileService {
             
                    System.out.println("fileEnc "+fileEnc);
                    System.out.println("fileIVEnc "+fileIvEnc);
+                   System.out.println("fileDes "+fileDes);
             String keyDesCifrado=JsfUtil.desencriptar("Cwn31aDWCb1u4OKjX5QEsLyCCXxtw8enAhKbLM/raCU=");
            String extension="json";
             System.out.println("voy a descifrar ");
