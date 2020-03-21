@@ -132,9 +132,7 @@ public class FileService {
             String fileIvEnc= directory+JsfUtil.fileSeparator()+"licenseiv.enc";
             String fileDes= directory+JsfUtil.fileSeparator()+"license.des";
             
-                   System.out.println("fileEnc "+fileEnc);
-                   System.out.println("fileIVEnc "+fileIvEnc);
-                   System.out.println("fileDes "+fileDes);
+          
             String keyDesCifrado=JsfUtil.desencriptar("Cwn31aDWCb1u4OKjX5QEsLyCCXxtw8enAhKbLM/raCU=");
            String extension="json";
             System.out.println("voy a descifrar ");
