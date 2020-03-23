@@ -15,6 +15,7 @@ public class JAXRSConfiguration extends Application {
         Set<Class<?>> resources = new java.util.HashSet<>();
         resources.add(com.bpbonline.serverfiles.resources.JavaEE8Resource.class);
         resources.add(com.bpbonline.serverfiles.resources.FileService.class);
+        resources.add(com.bpbonline.serverfiles.resources.ZipService.class);
        
         
        
