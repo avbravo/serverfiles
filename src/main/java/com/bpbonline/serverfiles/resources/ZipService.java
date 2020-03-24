@@ -173,7 +173,7 @@ public class ZipService {
     public String readJson() {
         try {
             String json = directory + JsfUtil.fileSeparator() + "authorizedlicense" + JsfUtil.fileSeparator() + "license" + JsfUtil.fileSeparator() + "license_decrypted.json";
-            InputStream is = new FileInputStream("/home/avbravo/Descargas/license.json");
+            InputStream is = new FileInputStream(json );
 
             JsonParserFactory factory = Json.createParserFactory(null);
             JsonParser parser = factory.createParser(is, StandardCharsets.UTF_8);
