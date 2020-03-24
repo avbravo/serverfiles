@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.bpbonline</groupId>
     <artifactId>serverfiles</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.2</version>
     <packaging>war</packaging>
     <name>serverfiles</name>
     

@@ -98,7 +98,7 @@ public class ZipService {
         if (JsfUtil.unzipFileToDirectory(filePath, JsfUtil.pathOfFile(filePath))) {
             // Despues de descomprimir se desencriptar  
           if( desencriptarFile()){
-              
+              readJson();
           }
         }
 
