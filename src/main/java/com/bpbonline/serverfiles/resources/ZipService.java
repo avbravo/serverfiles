@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -37,7 +38,8 @@ import javax.ws.rs.core.Response;
  */
 @Path("/zip")
 public class ZipService {
- List<License> licenseList = new ArrayList<>();
+
+    List<License> licenseList = new ArrayList<>();
 
     public List<License> getLicenseList() {
         return licenseList;
@@ -46,6 +48,7 @@ public class ZipService {
     public void setLicenseList(List<License> licenseList) {
         this.licenseList = licenseList;
     }
+    private String directoryLicense = JsfUtil.userHome() + JsfUtil.fileSeparator() + "fiscalserver" + JsfUtil.fileSeparator() + "license";
     private String directory = JsfUtil.userHome() + JsfUtil.fileSeparator() + "fiscalserver" + JsfUtil.fileSeparator() + "license";
 
     @POST
@@ -55,21 +58,28 @@ public class ZipService {
     public Response reciveFile(@Context HttpHeaders headers, InputStream fileInputStream) {
         MultivaluedMap<String, String> map = headers.getRequestHeaders();
 
+        //Crear al directorio license
+        File directorioLicense = new File(directoryLicense);
+        if (!directorioLicense.exists()) {
+            //Crear el directorio
+            if (!directorioLicense.mkdirs()) {
+
+                System.out.println("---> no se creo el directorio " + directorioLicense);
+            }
+        }
+
+//Agrega los milisegundos al nombre del directorio
+        directory = directory + JsfUtil.fileSeparator() + System.currentTimeMillis();
         //getFileName
         String fileName = getFileName(map);
 
-//        //get folder
-//        String folder = getFolder(map);
         OutputStream out = null;
-
         File directorio = new File(directory);
         if (!directorio.exists()) {
             //Crear el directorio
-            if (directorio.mkdirs()) {
-                System.out.println("---> creado el directorio");
-//
-            } else {
-                System.out.println("---> no se creo el directorio");
+            if (!directorio.mkdirs()) {
+
+                System.out.println("---> no se creo el directorio:" + directory);
             }
         }
 
@@ -97,9 +107,10 @@ public class ZipService {
         //UNZIP ARCHIVO .ZIP
         if (JsfUtil.unzipFileToDirectory(filePath, JsfUtil.pathOfFile(filePath))) {
             // Despues de descomprimir se desencriptar  
-          if( desencriptarFile()){
-              readJson();
-          }
+            if (desencriptarFile()) {
+                readJson();
+                deleteDirectory(directory);
+            }
         }
 
         return Response.status(Response.Status.OK).entity("File '" + filePath + "' uploaded successfully")
@@ -123,22 +134,6 @@ public class ZipService {
         return "";
     }
 
-//    private String getFolder(MultivaluedMap<String, String> headers) {
-//        try {
-//             String[] folder = headers.getFirst("folder").split(";");
-//        for (String filename : folder) {
-//            if ((filename.trim().startsWith("folder"))) {
-//                String[] name = filename.split("=");
-//                String finalFileName = name[1].trim().replaceAll("\"", "");
-//                return finalFileName;
-//            }
-//        }
-//        } catch (Exception e) {
-//            System.out.println(" getFolder() "+e.getLocalizedMessage());
-//        }
-//       
-//        return "";
-//    }
     // <editor-fold defaultstate="collapsed" desc="Boolean desencriptarFile() ">
     public Boolean desencriptarFile() {
         try {
@@ -149,7 +144,7 @@ public class ZipService {
 
             String keyDesCifrado = JsfUtil.desencriptar("Cwn31aDWCb1u4OKjX5QEsADO/jKu7/SQWpX0DnwlPGI=");
             String extension = "json";
-            System.out.println("voy a descifrar ");
+    
             if (FileDecryption.desencriptarFile(fileEnc, fileIvEnc, fileDes, keyDesCifrado, extension)) {
 
                 System.out.println("Se desencripto archivo");
@@ -167,19 +162,23 @@ public class ZipService {
         return false;
     }
 // </editor-fold>
-    
-    
-     // <editor-fold defaultstate="collapsed" desc="String readJson()">
+
+    // <editor-fold defaultstate="collapsed" desc="String readJson()">
     public String readJson() {
         try {
             String json = directory + JsfUtil.fileSeparator() + "authorizedlicense" + JsfUtil.fileSeparator() + "license" + JsfUtil.fileSeparator() + "license_decrypted.json";
-            InputStream is = new FileInputStream(json );
+
+            System.out.println("=========================");
+            System.out.println("Json  " + json);
+            System.out.println("=========================");
+            InputStream is = new FileInputStream(json);
 
             JsonParserFactory factory = Json.createParserFactory(null);
             JsonParser parser = factory.createParser(is, StandardCharsets.UTF_8);
 
             if (!parser.hasNext() && parser.next() != JsonParser.Event.START_ARRAY) {
-                JsfUtil.warningDialog("warning", "No se abrio el archivo");
+
+                System.out.println(" No se abrio el archivo");
                 return "";
             }
             // looping over object attributes
@@ -187,7 +186,7 @@ public class ZipService {
             licenseList = new ArrayList<>();
             License license = new License();
             while (parser.hasNext()) {
-    
+
                 JsonParser.Event event = parser.next();
 
                 // starting object
@@ -207,39 +206,39 @@ public class ZipService {
                                     parser.next();
                                     license = new License();
                                     license.setIdlicense(parser.getString());
-                    
+
                                     break;
 
                                 case "key":
                                     parser.next();
                                     license.setKey(parser.getString());
-                  
+
                                     break;
                                 case "system":
                                     parser.next();
                                     license.setSystem(parser.getString());
-                         
+
                                     break;
                                 case "title":
                                     parser.next();
                                     license.setTitle(parser.getString());
-                            
+
                                     break;
 
                                 case "description":
                                     parser.next();
                                     license.setDescription(parser.getString());
-                              
+
                                     break;
                                 case "company":
                                     parser.next();
                                     license.setCompany(parser.getString());
-                          
+
                                     break;
                                 case "author":
                                     parser.next();
                                     license.setAuthor(parser.getString());
-                        
+
                                     licenseList.add(license);
                                     break;
 
@@ -249,8 +248,7 @@ public class ZipService {
                 }
             }
 
-            JsfUtil.infoDialog("Terminado", "Proceso terminado...size(): " + licenseList.size());
-            System.out.println("IMPRIMIR LAS LICENCIAS");
+            System.out.println("Proceso terminado...size(): " + licenseList.size());
             for (License l : licenseList) {
                 System.out.println("---> idlicense " + l.getIdlicense());
                 System.out.println("---> KEY " + l.getKey());
@@ -258,11 +256,53 @@ public class ZipService {
 
             return "";
         } catch (Exception e) {
-            JsfUtil.errorDialog("error ", e.getLocalizedMessage());
+            System.out.println("readJson() " + e.getLocalizedMessage());
+
         }
         return "";
     }
 
     // </editor-fold>
+    // <editor-fold defaultstate="collapsed" desc="method()">
+    private Boolean deleteDirectory(String directory) {
+        try {
+          directory = directory + JsfUtil.fileSeparator() + "authorizedlicense" + JsfUtil.fileSeparator() + "license" + JsfUtil.fileSeparator() ;
+            System.out.println("-->>>>> delete "+directory);
+            File directorio = new File(directory);
+            File f;
+            if (directorio.isDirectory()) {
+                String[] files = directorio.list();
+                if (files.length > 0) {
+                    System.out.println(" Directorio vacio: " + directory);
+                    for (String archivo : files) {
+                        System.out.println(archivo);
+                        f = new File(directorio + File.separator + archivo);
+                         if(f.delete()){
+                       System.out.println("Borrado:" + archivo);      
+                         }
 
+//                        System.out.println("Ultima modificación: " + new Date(f.lastModified()));
+//                        long Time;
+//                        Time = (System.currentTimeMillis() - f.lastModified());
+//                        long cantidadDia = (Time / 86400000);
+//                        System.out.println("Age of the file is: " + cantidadDia + " days");
+//                        // Attempt to delete it
+//                        //86400000 ms is equivalent to one day
+//                        if (Time > (86400000 * 1) && archivo.contains(".pdf")) {
+//                            System.out.println("Borrado:" + archivo);
+//                            f.delete();
+//                            f.deleteOnExit();
+//                        }
+
+                    }
+                }
+            }
+        }catch (Exception e) {
+              System.out.println("deleteDirectory()" + e.getLocalizedMessage());
+        }
+            return false;
+        }
+        // </editor-fold>
+
+    
 }
